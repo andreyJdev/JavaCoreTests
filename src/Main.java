@@ -12,7 +12,14 @@ public class Main {
         myStringBuilder1.undo();
         System.out.println(myStringBuilder1);
 
-        MyStringBuilder myStringBuilder2 = new MyStringBuilder("Привет Привет Привет Привет Привет Привет Привет  22322 Привет Привет Привет Привет world ");
+        MyStringBuilder myStringBuilder2 = new MyStringBuilder("Привет Привет Привет Привет Привет Привет Привет  22322  ");
+        myStringBuilder2.append("Привет \" +\n" +
+                "                \"Привет Привет Привет world Привет Привет Привет Привет Привет Привет \" +\n" +
+                "                \"Привет  22322 Привет Привет Привет Привет world Привет Привет Привет \" +\n" +
+                "                \"Привет Привет Привет Привет  22322 Привет Привет Привет Привет world");
+
+        myStringBuilder2.undo();
+
         System.out.println(myStringBuilder2);
     }
 }

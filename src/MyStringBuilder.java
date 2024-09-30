@@ -2,118 +2,142 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyStringBuilder {
-    private char[] value;
+    // дефолтный размер
+    private static final int DEFAULT_SIZE = 16;
+
+    // параметры строки
+    private char[] symbolsArray;
     private int count;
-    private final Originator originator = new Originator();
+
+    // смотритель
     private final Caretaker caretaker = new Caretaker();
 
+    // пустая строка
     public MyStringBuilder() {
-        value = new char[16];
-        count = 0;
+        this.symbolsArray = new char[DEFAULT_SIZE];
+        this.count = 0;
     }
 
-    public MyStringBuilder(String str) {
-        int length = str.length();
-        int size = Math.max(str.length(), 16);
-        value = new char[size];
-        str.getChars(0, length, value, count);
-        count += length;
+    // инициализация со строкой по умолчанию
+    public MyStringBuilder(String source) {
+        int size = DEFAULT_SIZE;
+        if (source == null || source.isEmpty()) {
+            this.symbolsArray = new char[size];
+            this.count = 0;
+        } else if (source.length() > DEFAULT_SIZE) {
+            size = (int) Math.ceil(source.length() / (double) DEFAULT_SIZE) * DEFAULT_SIZE;
+            this.symbolsArray = new char[size];
+            this.count = source.length();
+            System.arraycopy(source.toCharArray(), 0, this.symbolsArray, 0, this.count);
+        } else {
+            this.symbolsArray = new char[size];
+            this.count = source.length();
+        }
     }
 
-    public MyStringBuilder append(String str) {
+    // добавление строки в конец
+    public void append(String str) {
         if (str == null)
-            return this;
+            return;
 
-        caretaker.addMemento(originator.saveStateToMemento(this));
+        // снимок
+        caretaker.addMemento(createMemento());
 
         int length = str.length();
-        valExtension(count + length);
-        str.getChars(0, length, value, count);
-        count += length;
-        return this;
+        valExtension(this.count + length);
+        str.getChars(0, length, this.symbolsArray, this.count);
+        this.count += length;
     }
 
-    public MyStringBuilder insert(int offset, String str) {
-        if (offset < 0 || offset > count) {
+    // добавление строки в середину
+    public void insert(int offset, String str) {
+        if (offset < 0 || offset > this.count) {
             throw new IndexOutOfBoundsException();
         }
         if (str == null) {
-            return this;
+            return;
         }
 
-        caretaker.addMemento(originator.saveStateToMemento(this));
+        // снимок
+        caretaker.addMemento(createMemento());
 
         int length = str.length();
-        valExtension(count + length);
-        System.arraycopy(value, offset, value, offset + length, count - offset);
-        str.getChars(0, length, value, offset);
+        valExtension(this.count + length);
+        System.arraycopy(this.symbolsArray, offset, this.symbolsArray, offset + length, this.count - offset);
+        str.getChars(0, length, this.symbolsArray, offset);
         count += length;
-        return this;
     }
 
+    // расширение массива в 2 раза
     private void valExtension(int length) {
-        if (length < value.length) {
-            return;
-        } else {
-            char[] newValue = new char[value.length * 2];
-            System.arraycopy(value, 0, newValue, 0, count);
-            value = newValue;
-        }
+        boolean needExtension = true;
+
+        // пока нужно расширение
+        while (needExtension)
+            if (length < this.symbolsArray.length) {
+                needExtension = false;
+            } else {
+                char[] newValue = new char[this.symbolsArray.length * 2];
+                System.arraycopy(this.symbolsArray, 0, newValue, 0, count);
+                this.symbolsArray = newValue;
+            }
     }
 
     public void undo() {
-        Originator.Memento memento = caretaker.getLastMemento();
-        if (memento != null) {
-            originator.getStateFromMemento(memento, this);
-        } else {
-            throw new NullPointerException("Caretaker is null");
-        }
+        Memento memento = caretaker.getLastMemento();
+        getStateFromMemento(memento);
+        caretaker.removeMemento();
     }
 
+    // от 0 символа до последнего не null
     public String toString() {
-        return new String(value, 0, count);
+        return new String(this.symbolsArray, 0, this.count);
     }
 
-    static class Originator {
-        private char[] stateValue;
-        private int stateCount;
+    // создаем снимок текущего состояния объекта
+    private Memento createMemento() {
+        return new Memento(this.symbolsArray, this.count);
+    }
 
-        public Memento saveStateToMemento(MyStringBuilder thisStringBuilder) {
-            stateValue = new char[thisStringBuilder.value.length];
-            System.arraycopy(thisStringBuilder.value, 0, stateValue, 0, thisStringBuilder.count);
-            stateCount = thisStringBuilder.count;
-            return new Memento(stateValue, stateCount);
-        }
+    // восстановить состояние из снимка
+    private void getStateFromMemento(Memento memento) {
+        this.symbolsArray = new char[memento.stateCount];
+        System.arraycopy(memento.stateSymbols, 0, this.symbolsArray, 0, memento.stateCount);
+        this.count = memento.stateCount;
+    }
 
-        public void getStateFromMemento(Memento memento, MyStringBuilder thisStringBuilder) {
-            thisStringBuilder.value = new char[memento.stateValue.length];
-            System.arraycopy(memento.stateValue, 0, thisStringBuilder.value, 0, memento.stateCount);
-            thisStringBuilder.count = memento.stateCount;
-        }
+    // класс снимок
+    private static class Memento {
+        private final char[] stateSymbols;
+        private final int stateCount;
 
-        private static class Memento {
-            private final char[] stateValue;
-            private final int stateCount;
-
-            public Memento(char[] stateValue, int stateCount) {
-                this.stateValue = stateValue;
-                this.stateCount = stateCount;
-            }
+        private Memento(char[] stateSymbols, int stateCount) {
+            this.stateSymbols = stateSymbols;
+            this.stateCount = stateCount;
         }
     }
 
+    // смотритель
     private static class Caretaker {
-        private final List<Originator.Memento> mementoList = new ArrayList<>();
+        private final List<Memento> mementoList = new ArrayList<>();
 
-        private void addMemento(Originator.Memento memento) {
+        // добавляем снимок
+        private void addMemento(Memento memento) {
             mementoList.add(memento);
         }
 
-        private Originator.Memento getLastMemento() {
-            if (!mementoList.isEmpty()) {
-                return mementoList.remove(mementoList.size() - 1);
+        // получаем последний снимок
+        private Memento getLastMemento() {
+            if (mementoList.isEmpty()) {
+                throw new NullPointerException("No memento was added to the caretaker");
+            } else {
+                return mementoList.get(mementoList.size() - 1);
             }
-            return null;
+        }
+
+        // удаляем последний снимок
+        private void removeMemento() {
+            mementoList.remove(mementoList.size() - 1);
         }
     }
 }
