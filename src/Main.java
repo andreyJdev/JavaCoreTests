@@ -1,25 +1,20 @@
+import java.util.Arrays;
+
 public class Main {
+
+    public static <T> T[] filter(T[] array, Filter<T> filter) {
+        T[] arrayCopy = Arrays.copyOf(array, array.length);
+        for (int i = 0; i < arrayCopy.length; i++) {
+            arrayCopy[i] = filter.apply(arrayCopy[i]);
+        }
+        return arrayCopy;
+    }
+
     public static void main(String[] args) {
-        MyStringBuilder myStringBuilder1 = new MyStringBuilder();
-        myStringBuilder1.append("Привет ");
-        myStringBuilder1.append("Мир!");
-        myStringBuilder1.insert(11, "Инсерт");
-        System.out.println(myStringBuilder1);
-        myStringBuilder1.undo();
-        System.out.println(myStringBuilder1);
-        myStringBuilder1.undo();
-        System.out.println(myStringBuilder1);
-        myStringBuilder1.undo();
-        System.out.println(myStringBuilder1);
-
-        MyStringBuilder myStringBuilder2 = new MyStringBuilder("Привет Привет Привет Привет Привет Привет Привет  22322  ");
-        myStringBuilder2.append("Привет \" +\n" +
-                "                \"Привет Привет Привет world Привет Привет Привет Привет Привет Привет \" +\n" +
-                "                \"Привет  22322 Привет Привет Привет Привет world Привет Привет Привет \" +\n" +
-                "                \"Привет Привет Привет Привет  22322 Привет Привет Привет Привет world");
-
-        myStringBuilder2.undo();
-
-        System.out.println(myStringBuilder2);
+        Integer[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        Integer[] arrayCopy = filter(array, new FilterImpl<>());
+        for (Integer obj : arrayCopy) {
+            System.out.println(obj);
+        }
     }
 }
