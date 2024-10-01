@@ -1,20 +1,20 @@
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
-
-    public static <T> T[] filter(T[] array, Filter<T> filter) {
-        T[] arrayCopy = Arrays.copyOf(array, array.length);
-        for (int i = 0; i < arrayCopy.length; i++) {
-            arrayCopy[i] = filter.apply(arrayCopy[i]);
+    public static <T> Map<T, Integer>toMap(T[] array) {
+        Map<T, Integer> map = new HashMap<>();
+        T[] arrayCpy = Arrays.copyOf(array, array.length);
+        for (T i : arrayCpy) {
+            map.merge(i, 1, Integer::sum);
         }
-        return arrayCopy;
+        return map;
     }
 
     public static void main(String[] args) {
-        Integer[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        Integer[] arrayCopy = filter(array, new FilterImpl<>());
-        for (Integer obj : arrayCopy) {
-            System.out.println(obj);
-        }
+        Integer[] array = {1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, 1, 1, 2, 3, 5, 5, 6, 7, 10, -1};
+        Map<Integer, Integer> map = toMap(array);
+        System.out.println(map);
     }
 }
