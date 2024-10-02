@@ -1,20 +1,34 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Random;
 
 public class Main {
-    public static <T> Map<T, Integer>toMap(T[] array) {
-        Map<T, Integer> map = new HashMap<>();
-        T[] arrayCpy = Arrays.copyOf(array, array.length);
-        for (T i : arrayCpy) {
-            map.merge(i, 1, Integer::sum);
-        }
-        return map;
+
+    public static Integer randInt(int min, int max) {
+        Random rand = new Random();
+        return rand.nextInt(min, max);
     }
 
     public static void main(String[] args) {
-        Integer[] array = {1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, 1, 1, 2, 3, 5, 5, 6, 7, 10, -1};
-        Map<Integer, Integer> map = toMap(array);
-        System.out.println(map);
+        BlockingQueue queue = new BlockingQueue(16);
+        // без thread2 блокируется при добавлении 17-го элемента
+        Thread thread1 = new Thread(() -> {
+            for (int i = 0; i < 17; i++)
+                queue.enqueue(randInt(-99, 100));
+
+            System.out.println(queue.getSize());
+            System.out.println(queue);
+        });
+        // без thread3 блокируется при извлечении 18-го элемента
+        Thread thread2 = new Thread(() -> {
+            for (int i = 0; i < 18; i++)
+                System.out.println(queue.dequeue());
+        });
+        // завершает программу
+        Thread thread3 = new Thread(() -> {
+            queue.enqueue(randInt(-99, 100));
+        });
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
     }
 }
