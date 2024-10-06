@@ -28,5 +28,17 @@ public class App
 
         boolean isTrianglePerimeterLarger = comparePerimeters(triangle, rectangle);
         System.out.println("Is triangle perimeter larger than rectangle perimeter? " + isTrianglePerimeterLarger);
+
+        Cube cube = new Cube(3);
+        Cylinder cylinder = new Cylinder(4, 7);
+
+        System.out.println("Cube side: " + cube.getSide());
+        System.out.println("Cube volume: " + cube.getVolume());
+        System.out.println("Cube surface area: " + cube.getSurfaceArea());
+
+        System.out.println("Cylinder radius: " + cylinder.getRadius());
+        System.out.println("Cylinder height: " + cylinder.getHeight());
+        System.out.println("Cylinder volume: " + cylinder.getVolume());
+        System.out.println("Cylinder surface area: " + cylinder.getSurfaceArea());
     }
 }
