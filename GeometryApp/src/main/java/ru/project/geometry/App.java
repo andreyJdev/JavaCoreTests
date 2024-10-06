@@ -1,5 +1,8 @@
 package ru.project.geometry;
 
+import static ru.project.geometry.Utils.compareAreas;
+import static ru.project.geometry.Utils.comparePerimeters;
+
 /**
  * Hello world!
  *
@@ -19,5 +22,11 @@ public class App
 
         System.out.println("Triangle area: " + triangle.getArea());
         System.out.println("Triangle perimeter: " + triangle.getPerimeter());
+
+        boolean isCircleAreaLarger = compareAreas(circle, rectangle);
+        System.out.println("Is circle area larger than rectangle area? " + isCircleAreaLarger);
+
+        boolean isTrianglePerimeterLarger = comparePerimeters(triangle, rectangle);
+        System.out.println("Is triangle perimeter larger than rectangle perimeter? " + isTrianglePerimeterLarger);
     }
 }
